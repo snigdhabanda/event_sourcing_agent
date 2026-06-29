@@ -6,6 +6,12 @@ build
 # env
 .env
 .env*.local
+.env.backup*
+
+# local agent / neon init artifacts
+.claude/
+.neon
+skills-lock.json
 
 # vercel
 .vercel

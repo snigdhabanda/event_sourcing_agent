@@ -4,12 +4,14 @@ if (!process.env.OPENAI_API_KEY) {
   throw new Error("OPENAI_API_KEY is not set");
 }
 
-/** Gateway-ready (OPENAI_BASE_URL), same pattern as the Anthropic client. */
+/**
+ * OpenAI client for embeddings — always calls OpenAI directly.
+ *
+ * Unlike the Anthropic client (src/lib/llm.ts), embeddings do NOT route through
+ * the Neon AI Gateway: the gateway does not offer an OpenAI embeddings model.
+ */
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-  ...(process.env.OPENAI_BASE_URL
-    ? { baseURL: process.env.OPENAI_BASE_URL }
-    : {}),
 });
 
 export const EMBEDDING_MODEL = "text-embedding-3-small";
