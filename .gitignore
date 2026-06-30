@@ -19,3 +19,4 @@ skills-lock.json
 # typescript
 next-env.d.ts
 *.tsbuildinfo
+.env*

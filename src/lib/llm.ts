@@ -14,21 +14,27 @@ const gatewayToken = process.env.NEON_AI_GATEWAY_TOKEN;
 const gatewayBase = process.env.NEON_AI_GATEWAY_BASE_URL;
 const useGateway = Boolean(gatewayToken && gatewayBase);
 
-const apiKey = useGateway ? gatewayToken : process.env.ANTHROPIC_API_KEY;
-if (!apiKey) {
+if (!useGateway && !process.env.ANTHROPIC_API_KEY) {
   throw new Error(
     "No Anthropic credential: set NEON_AI_GATEWAY_TOKEN + NEON_AI_GATEWAY_BASE_URL " +
       "for the Neon AI Gateway, or ANTHROPIC_API_KEY to call Anthropic directly.",
   );
 }
 
-export const anthropic = new Anthropic({
-  apiKey,
-  ...(useGateway
-    ? { baseURL: `${gatewayBase}/ai-gateway/anthropic` }
-    : process.env.ANTHROPIC_BASE_URL
-      ? { baseURL: process.env.ANTHROPIC_BASE_URL }
-      : {}),
-});
+export const anthropic = useGateway
+  ? new Anthropic({
+      // The Neon AI Gateway authenticates with `Authorization: Bearer <token>`,
+      // not the `x-api-key` header the SDK sends for `apiKey`. `authToken` sets
+      // bearer auth; `apiKey: null` stops the SDK reading ANTHROPIC_API_KEY too.
+      authToken: gatewayToken,
+      apiKey: null,
+      baseURL: `${gatewayBase}/ai-gateway/anthropic`,
+    })
+  : new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY!,
+      ...(process.env.ANTHROPIC_BASE_URL
+        ? { baseURL: process.env.ANTHROPIC_BASE_URL }
+        : {}),
+    });
 
 export const AGENT_MODEL = "claude-opus-4-8";
