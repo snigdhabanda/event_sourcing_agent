@@ -11,7 +11,7 @@ export const sources: Source[] = [
     // NOTE: this is a single weekly post — its URL changes each week. See README
     // "Source maintenance" for the options (update weekly vs. crawl from the
     // publication root and let the agent find the latest post).
-    url: "https://bayareafoundersclub.substack.com/p/bay-area-events-for-the-week-of-june-900",
+    url: "https://bayareafoundersclub.substack.com/p/bay-area-events-for-the-week-of-june-d1e",
     kind: "agent",
     enabled: true,
   },

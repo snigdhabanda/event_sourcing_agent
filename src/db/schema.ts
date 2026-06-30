@@ -68,3 +68,34 @@ export const events = pgTable(
 
 export type EventRow = typeof events.$inferSelect;
 export type NewEventRow = typeof events.$inferInsert;
+
+/**
+ * RSVPs — one row per (user, event) the user is going to.
+ *
+ * `userId` references the Better-Auth-managed user in neon_auth."user"(id).
+ * That table lives in a different schema we don't manage with Drizzle, so we
+ * store the uuid without a Drizzle-managed FK (the cross-schema FK + display
+ * join happen in queries). `eventId` does FK into our public.events.
+ */
+export const rsvps = pgTable(
+  "rsvps",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    eventId: uuid("event_id")
+      .notNull()
+      .references(() => events.id, { onDelete: "cascade" }),
+    userId: uuid("user_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    // A user can RSVP to a given event at most once.
+    uniqueIndex("rsvps_user_event_unique").on(t.userId, t.eventId),
+    index("rsvps_event_idx").on(t.eventId),
+    index("rsvps_user_idx").on(t.userId),
+  ],
+);
+
+export type RsvpRow = typeof rsvps.$inferSelect;
+export type NewRsvpRow = typeof rsvps.$inferInsert;

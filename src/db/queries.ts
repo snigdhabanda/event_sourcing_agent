@@ -84,3 +84,81 @@ export async function listUpcomingEvents(limit = 100): Promise<EventListItem[]> 
 
   return result.rows as unknown as EventListItem[];
 }
+
+/** A user who has RSVP'd, joined from the Better-Auth-managed user table. */
+export type Attendee = {
+  id: string;
+  name: string | null;
+  email: string;
+  image: string | null;
+};
+
+/** An event plus its RSVP social data. */
+export type EnrichedEvent<T> = T & {
+  attendees: Attendee[];
+  goingCount: number;
+  isGoing: boolean;
+};
+
+/**
+ * Decorate a list of events with their attendees (who's going) and whether the
+ * current user is going. One extra query joins rsvps → neon_auth."user".
+ */
+export async function attachRsvps<T extends { id: string }>(
+  events: T[],
+  currentUserId: string | null,
+): Promise<EnrichedEvent<T>[]> {
+  if (events.length === 0) return [];
+
+  const ids = events.map((e) => e.id);
+  // A JS array in a drizzle template serializes to a record `(a,b,…)`, which
+  // can't cast to uuid[]; build an explicit, parameterized IN list instead.
+  const idList = sql.join(
+    ids.map((id) => sql`${id}`),
+    sql`, `,
+  );
+  const result = await db.execute(sql`
+    select r.event_id as "eventId", u.id, u.name, u.email, u.image
+    from rsvps r
+    join neon_auth."user" u on u.id = r.user_id
+    where r.event_id::text in (${idList})
+    order by r.created_at asc
+  `);
+
+  const byEvent = new Map<string, Attendee[]>();
+  for (const row of result.rows as unknown as (Attendee & { eventId: string })[]) {
+    const list = byEvent.get(row.eventId) ?? [];
+    list.push({ id: row.id, name: row.name, email: row.email, image: row.image });
+    byEvent.set(row.eventId, list);
+  }
+
+  return events.map((e) => {
+    const attendees = byEvent.get(e.id) ?? [];
+    return {
+      ...e,
+      attendees,
+      goingCount: attendees.length,
+      isGoing: currentUserId
+        ? attendees.some((a) => a.id === currentUserId)
+        : false,
+    };
+  });
+}
+
+/** Toggle the current user's RSVP for an event. Returns the new state. */
+export async function toggleRsvp(
+  userId: string,
+  eventId: string,
+): Promise<{ going: boolean }> {
+  const deleted = await db.execute(sql`
+    delete from rsvps where user_id = ${userId} and event_id = ${eventId}
+    returning id
+  `);
+  if (deleted.rows.length > 0) return { going: false };
+
+  await db.execute(sql`
+    insert into rsvps (user_id, event_id) values (${userId}, ${eventId})
+    on conflict (user_id, event_id) do nothing
+  `);
+  return { going: true };
+}
