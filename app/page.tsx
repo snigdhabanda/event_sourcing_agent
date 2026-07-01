@@ -28,19 +28,22 @@ export default async function Home() {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-10">
-        <div className="mb-8">
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            What&apos;s happening in San Francisco
-          </h1>
-          <p className="mt-2 text-neutral-500">
-            {currentUser
-              ? "Search events, mark the ones you're going to, and see who else is in."
-              : "Search upcoming events across the SF tech scene. Sign in to RSVP and see who's going."}
-          </p>
-        </div>
+  <div className="mb-8">
+    <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+      What&apos;s happening in San Francisco
+    </h1>
+    <p className="mt-2 text-neutral-500">
+      {currentUser
+        ? "Search events, mark the ones you're going to, and see who else is in."
+        : "Search upcoming events across the SF tech scene. Sign in to RSVP and see who's going."}
+    </p>
+  </div>
 
-        <EventBrowser initialEvents={initialEvents} currentUser={currentUser} />
-      </main>
+  {/* This adds space between heading and search bar */}
+  <div className="mb-10 pt-4">
+    <EventBrowser initialEvents={initialEvents} currentUser={currentUser} />
+  </div>
+</main>
     </div>
   );
 }

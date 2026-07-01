@@ -120,60 +120,69 @@ export function EventBrowser({
   }
 
   return (
-    <div>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative flex-1">
-          <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-neutral-400">
-            <SearchIcon />
-          </span>
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Try: ai founder mixer, hackathon, design jam…"
-            className="w-full rounded-xl border border-neutral-200 bg-white py-3 pl-11 pr-4 text-base shadow-sm outline-none transition focus:border-neutral-900 focus:ring-2 focus:ring-neutral-900/10"
-          />
-        </div>
+<div>
+  <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+  <div className="relative flex-1 pl-6">
+  {/* Icon moved inward */}
+  <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-neutral-400">
+    <SearchIcon />
+  </span>
+  
+  {/* Text moved inward */}
+  <input
+  type="search"
+  value={query}
+  onChange={(e) => setQuery(e.target.value)}
+  placeholder="Try: ai founder, mixer, hackathon, design jam…"
+  className="w-full rounded-xl border border-neutral-200 bg-white py-3 pl-24 pr-10 text-base shadow-sm outline-none transition focus:border-neutral-900 focus:ring-2 focus:ring-neutral-900/10"
+  style={{
+    paddingLeft: '40px',
+    WebkitAppearance: 'none',
+    MozAppearance: 'none',
+    appearance: 'none'
+  }}
+/>
+</div>
 
-        {signedIn && (
-          <div className="inline-flex shrink-0 rounded-xl border border-neutral-200 bg-white p-1 shadow-sm">
-            <SegButton active={!mineOnly} onClick={() => setMineOnly(false)}>
-              All events
-            </SegButton>
-            <SegButton active={mineOnly} onClick={() => setMineOnly(true)}>
-              Going
-            </SegButton>
-          </div>
-        )}
+    {signedIn && (
+      <div className="inline-flex shrink-0 rounded-xl border border-neutral-200 bg-white p-1 shadow-sm">
+        <SegButton active={!mineOnly} onClick={() => setMineOnly(false)}>
+          All events
+        </SegButton>
+        <SegButton active={mineOnly} onClick={() => setMineOnly(true)}>
+          Going
+        </SegButton>
       </div>
+    )}
+  </div>
 
-      <div className="mt-3 h-5 text-sm text-neutral-400">
-        {loading
-          ? "Searching…"
-          : `${events.length} event${events.length === 1 ? "" : "s"}${
-              mineOnly ? " you're going to" : ""
-            }`}
-      </div>
+  <div className="mt-3 h-5 text-sm text-neutral-400">
+    {loading
+      ? "Searching…"
+      : `${events.length} event${events.length === 1 ? "" : "s"}${
+          mineOnly ? " you're going to" : ""
+        }`}
+  </div>
 
-      <ul className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {events.map((event) => (
-          <EventCard
-            key={event.id}
-            event={event}
-            signedIn={signedIn}
-            onToggle={() => toggleGoing(event)}
-          />
-        ))}
-      </ul>
+  <ul className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
+    {events.map((event) => (
+      <EventCard
+        key={event.id}
+        event={event}
+        signedIn={signedIn}
+        onToggle={() => toggleGoing(event)}
+      />
+    ))}
+  </ul>
 
-      {events.length === 0 && !loading && (
-        <p className="mt-16 text-center text-neutral-400">
-          {mineOnly
-            ? "You haven't RSVP'd to anything yet."
-            : "No events found."}
-        </p>
-      )}
-    </div>
+  {events.length === 0 && !loading && (
+    <p className="mt-16 text-center text-neutral-400">
+      {mineOnly
+        ? "You haven't RSVP'd to anything yet."
+        : "No events found."}
+    </p>
+  )}
+</div>
   );
 }
 
@@ -186,34 +195,40 @@ function EventCard({
   signedIn: boolean;
   onToggle: () => void;
 }) {
-  return (
-    <li className="group flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-      <a href={event.url} target="_blank" rel="noreferrer" className="block flex-1">
-        <div className="flex items-start justify-between gap-3">
-          <h2 className="font-semibold leading-snug tracking-tight text-neutral-900 group-hover:underline">
-            {event.title}
-          </h2>
-          <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${sourceColor(event.source)}`}>
-            {event.source}
-          </span>
-        </div>
-
-        {event.startsAt && (
-          <p className="mt-2 text-sm font-medium text-neutral-700">
-            {formatDate(event.startsAt)}
-          </p>
-        )}
-        {event.location && (
-          <p className="text-sm text-neutral-500">{event.location}</p>
-        )}
-        {event.description && (
-          <p className="mt-2 line-clamp-2 text-sm text-neutral-500">
-            {event.description}
-          </p>
-        )}
-      </a>
-
-      <div className="mt-4 flex items-center justify-between gap-3 border-t border-neutral-100 pt-4">
+  return (<li className="group flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+    <a 
+      href={event.url} 
+      target="_blank" 
+      rel="noreferrer" 
+      className="block flex-1 pl-4"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <h2 className="text-lg font-semibold leading-snug tracking-tight text-neutral-900 group-hover:underline">
+          {event.title}
+        </h2>
+        <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${sourceColor(event.source)}`}>
+          {event.source}
+        </span>
+      </div>
+  
+      {event.startsAt && (
+        <p className="mt-2 text-sm font-medium text-neutral-700">
+          {formatDate(event.startsAt)}
+        </p>
+      )}
+      {event.location && (
+        <p className="text-sm text-neutral-500">{event.location}</p>
+      )}
+      {event.description && (
+        <p className="mt-2 line-clamp-2 text-sm text-neutral-500">
+          {event.description}
+        </p>
+      )}
+    </a>
+  
+    {/* More space below the divider line */}
+    <div className="mt-4 border-t border-neutral-100 pt-8">
+      <div className="flex items-center justify-between gap-3">
         <Attendees attendees={event.attendees} goingCount={event.goingCount} />
         <button
           type="button"
@@ -227,7 +242,8 @@ function EventCard({
           {event.isGoing ? "✓ Going" : signedIn ? "Going?" : "Sign in to RSVP"}
         </button>
       </div>
-    </li>
+    </div>
+  </li>
   );
 }
 
